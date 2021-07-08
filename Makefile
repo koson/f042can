@@ -13,7 +13,7 @@ SRC = src/
 halSRC = HAL/src/
 halINC = HAL/inc/
 
-CPPFLAGS = -c -Wall -g -O2 --specs=nosys.specs -specs=nano.specs \
+CPPFLAGS = -c -Wall -g -O0 --specs=nosys.specs -specs=nano.specs \
 	   -nostdlib -nostartfiles -fno-common -D"assert_param(x)=" \
 	   -mcpu=cortex-m0 -mthumb -march=armv6-m -fno-exceptions \
 	   -Wno-pointer-arith -fno-rtti -mfloat-abi=soft \
@@ -44,7 +44,7 @@ $(BLD)main.elf: $(BLD)main.o $(BLD)startup.o $(BLD)uart.o
 $(BLD)main.elf: $(BLD)system_stm32f0xx.o $(BLD)stm32f0xx_it.o $(BLD)stm32f0xx_hal_msp.o 
 $(BLD)main.elf: $(BLD)stm32f0xx_hal.o $(BLD)stm32f0xx_hal_can.o $(BLD)stm32f0xx_hal_cortex.o 
 $(BLD)main.elf: $(BLD)stm32f0xx_hal_gpio.o $(BLD)stm32f0xx_hal_rcc.o 
-	$(CC) -o $(BLD)main.elf -T$(LIB)stm32f040.ld $(BLD)startup.o \
+	$(CC) -o $(BLD)main.elf -T$(LIB)stm32f042.ld $(BLD)startup.o \
 	$(BLD)main.o $(BLD)uart.o \
 	$(BLD)system_stm32f0xx.o $(BLD)stm32f0xx_it.o $(BLD)stm32f0xx_hal_msp.o \
 	$(BLD)stm32f0xx_hal.o $(BLD)stm32f0xx_hal_can.o $(BLD)stm32f0xx_hal_cortex.o \

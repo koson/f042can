@@ -1,6 +1,6 @@
 
-_Min_Heap_Size = 0x0200;	/*1024K*/
-_Min_Stack_Size = 0x0200;  /*1024K*/
+_Min_Heap_Size = 0x0400;	/*1024K*/
+_Min_Stack_Size = 0x0400;  /*1024K*/
 
 /*stack will be at the begining of RAM => _estack = 0x2000000 + 0x00001000 => _estack = 0x20001000*/
 
@@ -84,6 +84,7 @@ SECTIONS
     _sdata = .; /* STM specific definition */ /* create a global symbol at data start */
     *(.data)           /* .data sections */
     *(.data*)
+    . = ALIGN(4);
     _edata = . ;
     /*PROVIDE(current_ends = 0);*/
   } >RAM AT> ROM

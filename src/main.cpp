@@ -33,9 +33,10 @@ void HAL_CAN_ErrorCallback(CAN_HandleTypeDef *hcan) {
 int main(void) {
     HAL_Init();
     SystemClock_Config();
-
+    __enable_irq();
     MX_GPIO_Init();
     MX_CAN_Init();
+    
     if (uart.receivedByte == 0) {
         uart.receivedByte = 2;
     }
@@ -112,7 +113,7 @@ static void MX_CAN_Init(void) {
     hcan.Init.ReceiveFifoLocked = DISABLE;
     hcan.Init.TransmitFifoPriority = ENABLE;
     if (HAL_CAN_Init(&hcan) != HAL_OK) {
-        Error_Handler();
+        //Error_Handler();
     }
 
     CAN_FilterTypeDef sFilterConfig;
@@ -128,7 +129,7 @@ static void MX_CAN_Init(void) {
     // sFilterConfig.SlaveStartFilterBank = 14;
 
     if (HAL_CAN_ConfigFilter(&hcan, &sFilterConfig) != HAL_OK) {
-        Error_Handler();
+        //Error_Handler();
     }
 }
 
