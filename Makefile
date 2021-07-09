@@ -50,8 +50,10 @@ $(BLD)main.elf: $(BLD)stm32f0xx_hal_gpio.o $(BLD)stm32f0xx_hal_rcc.o
 	$(BLD)stm32f0xx_hal.o $(BLD)stm32f0xx_hal_can.o $(BLD)stm32f0xx_hal_cortex.o \
 	$(BLD)stm32f0xx_hal_gpio.o $(BLD)stm32f0xx_hal_rcc.o \
 	$(LFLAGS)
-	arm-none-eabi-size $(BLD)main.elf
 
+	@echo "\r\n____________________ SIZE ____________________________"
+	@arm-none-eabi-size $(BLD)main.elf
+	@echo "______________________________________________________"
 #__________________________________________________________________
 #_________________________ BUILD __________________________________	
 #__________________________________________________________________

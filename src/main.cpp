@@ -6,8 +6,8 @@
 CAN_HandleTypeDef hcan;
 Uart uart;
 
-CAN_TxHeaderTypeDef TxHeader;
-CAN_RxHeaderTypeDef RxHeader;
+CAN_TxHeaderTypeDef TxHeader; //
+CAN_RxHeaderTypeDef RxHeader; //
 uint8_t TxData[8] = {0};
 uint8_t RxData[8] = {0};
 uint32_t TxMailbox = 0;
@@ -18,16 +18,17 @@ static void MX_CAN_Init(void);
 
 void HAL_CAN_RxFifo0MsgPendingCallback(CAN_HandleTypeDef *hcan) {
     if (HAL_CAN_GetRxMessage(hcan, CAN_RX_FIFO0, &RxHeader, RxData) == HAL_OK) {
-        HAL_GPIO_TogglePin(GPIOC, GPIO_PIN_13);
+        //uart.sendStr("RxFifo");
+        for(int i = 0; i<1; i++) {
+            uart.sendByte(RxData[i]);
+        }
     }
 }
 
 void HAL_CAN_ErrorCallback(CAN_HandleTypeDef *hcan) {
     uint32_t er = HAL_CAN_GetError(hcan);
-    uart.sendStr("Err");
+    uart.sendStr("ErrCallback");
     uart.sendByte(er);
-    // sprintf(trans_str,"ER CAN %lu %08lX", er, er);
-    // HAL_UART_Transmit(&huart1, (uint8_t*)trans_str, strlen(trans_str), 100);
 }
 
 int main(void) {
@@ -46,7 +47,7 @@ int main(void) {
     TxHeader.ExtId = 0;
     TxHeader.RTR = CAN_RTR_DATA; // CAN_RTR_REMOTE
     TxHeader.IDE = CAN_ID_STD;   // CAN_ID_EXT
-    TxHeader.DLC = 8;
+    TxHeader.DLC = 1; //data size
     TxHeader.TransmitGlobalTime = (FunctionalState)0;
 
     HAL_CAN_Start(&hcan);
@@ -60,13 +61,12 @@ int main(void) {
     uint8_t temp=0;
     while (1) {
         TxHeader.StdId = 0x0378;
-        TxData[0] = 90;
+        TxData[0] ++;
         while (HAL_CAN_GetTxMailboxesFreeLevel(&hcan) == 0){};
         if (HAL_CAN_AddTxMessage(&hcan, &TxHeader, TxData, &TxMailbox) != HAL_OK) {
-            // HAL_UART_Transmit(&huart1, (uint8_t*)"ER SEND\n", 8, 100);
+            uart.sendStr("CAN_error");
         }
-        uart.sendByte(temp);
-        HAL_Delay(500);
+        HAL_Delay(50);
     }
 }
 
@@ -101,19 +101,20 @@ void SystemClock_Config(void) {
 static void MX_CAN_Init(void) {
 
     hcan.Instance = CAN;
-    hcan.Init.Prescaler = 4;
-    hcan.Init.Mode = CAN_MODE_NORMAL;
-    hcan.Init.SyncJumpWidth = CAN_SJW_1TQ;
-    hcan.Init.TimeSeg1 = CAN_BS1_13TQ;
-    hcan.Init.TimeSeg2 = CAN_BS2_2TQ;
-    hcan.Init.TimeTriggeredMode = DISABLE;
-    hcan.Init.AutoBusOff = ENABLE;
-    hcan.Init.AutoWakeUp = DISABLE;
-    hcan.Init.AutoRetransmission = ENABLE;
-    hcan.Init.ReceiveFifoLocked = DISABLE;
-    hcan.Init.TransmitFifoPriority = ENABLE;
+    hcan.Init.Prescaler = 42;
+    //CAN_MODE_NORMAL  CAN_MODE_LOOPBACK   CAN_MODE_SILENT   CAN_MODE_SILENT_LOOPBACK
+    hcan.Init.Mode = CAN_MODE_LOOPBACK;
+    hcan.Init.SyncJumpWidth = CAN_SJW_1TQ; // becomes significant on high speeds
+    hcan.Init.TimeSeg1 = CAN_BS1_6TQ;
+    hcan.Init.TimeSeg2 = CAN_BS2_1TQ;
+    hcan.Init.TimeTriggeredMode = DISABLE; //nodes synchronize mechanism (additional, not allowed by all devices)
+    hcan.Init.AutoBusOff = ENABLE; //automatic resets bus after error overflow
+    hcan.Init.AutoWakeUp = DISABLE; //
+    hcan.Init.AutoRetransmission = ENABLE; // if no ack send another time
+    hcan.Init.ReceiveFifoLocked = DISABLE; // circle buffer in receive FIFO (if ENABLED - usual buffer)
+    hcan.Init.TransmitFifoPriority = ENABLE; // usual fifo mechanism (if disabled priority mechanism tranmittion enabled)
     if (HAL_CAN_Init(&hcan) != HAL_OK) {
-        //Error_Handler();
+        Error_Handler();
     }
 
     CAN_FilterTypeDef sFilterConfig;
@@ -129,7 +130,7 @@ static void MX_CAN_Init(void) {
     // sFilterConfig.SlaveStartFilterBank = 14;
 
     if (HAL_CAN_ConfigFilter(&hcan, &sFilterConfig) != HAL_OK) {
-        //Error_Handler();
+        Error_Handler();
     }
 }
 

@@ -28,6 +28,36 @@ SECTIONS
     . = ALIGN(4);
   } >ROM
   /* Constant data into ROM memory*/
+
+    /*
+* These are the old initialisation sections, intended to contain
+* naked code, with the prologue/epilogue added by crti.o/crtn.o
+* when linking with startup files. The standalone startup code
+* currently does not run these, better use the init arrays below.
+*/
+  .inits :           /*static constr and destr*/
+  {
+  /*перед тем, как начинать секцию, текущий адрес нужно выровнять по слову (4 байта).*/
+    . = ALIGN(4); 
+    KEEP(*(.init))
+		KEEP(*(.fini))
+		. = ALIGN(4);
+    /* The preinit code, i.e. an array of pointers to initialisation 
+     * functions to be performed before constructors. */
+		PROVIDE_HIDDEN (__preinit_array_start = .);
+    /* The init code, i.e. an array of pointers to static constructors. */
+		PROVIDE_HIDDEN (__init_array_start = .);
+		KEEP(*(SORT(.init_array.*)))
+		KEEP(*(.init_array))
+		PROVIDE_HIDDEN (__init_array_end = .);
+    /*The fini code, i.e. an array of pointers to static destructors.*/
+		PROVIDE_HIDDEN (__fini_array_start = .);
+		KEEP(*(SORT(.fini_array.*)))
+		KEEP(*(.fini_array))
+		PROVIDE_HIDDEN (__fini_array_end = .);
+		. = ALIGN(4);
+  } >ROM
+
   .rodata :
   {
     . = ALIGN(4);
@@ -44,10 +74,11 @@ SECTIONS
     *(.glue_7)			/* glue arm to thumb code */
     *(.glue_7t)			/* glue thumb to arm code */
     . = ALIGN(4); 
+    /*
     KEEP (*(.init))
     KEEP (*(.fini))
     . = ALIGN(4); 
-    
+    */
     _etext = .;    /* define a global symbols at end of code */
   } >ROM
   /*  //////// for exceptions handling
