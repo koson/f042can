@@ -2,68 +2,41 @@
 /* Includes ------------------------------------------------------------------*/
 #include "main.h"
 #include "uart.h"
+#include "can.h"
 
-CAN_HandleTypeDef hcan;
-Uart uart;
 
-CAN_TxHeaderTypeDef TxHeader; //
-CAN_RxHeaderTypeDef RxHeader; //
-uint8_t TxData[8] = {0};
-uint8_t RxData[8] = {0};
-uint32_t TxMailbox = 0;
+uint8_t* i = (uint8_t*)0x20000404;
 
 void SystemClock_Config(void);
-static void MX_GPIO_Init(void);
-static void MX_CAN_Init(void);
-
-void HAL_CAN_RxFifo0MsgPendingCallback(CAN_HandleTypeDef *hcan) {
-    if (HAL_CAN_GetRxMessage(hcan, CAN_RX_FIFO0, &RxHeader, RxData) == HAL_OK) {
-        //uart.sendStr("RxFifo");
-        for(int i = 0; i<1; i++) {
-            uart.sendByte(RxData[i]);
-        }
-    }
-}
-
-void HAL_CAN_ErrorCallback(CAN_HandleTypeDef *hcan) {
-    uint32_t er = HAL_CAN_GetError(hcan);
-    uart.sendStr("ErrCallback");
-    uart.sendByte(er);
-}
 
 int main(void) {
     HAL_Init();
     SystemClock_Config();
     __enable_irq();
-    MX_GPIO_Init();
-    MX_CAN_Init();
+    Uart uart;
+    Can can;
     
     if (uart.receivedByte == 0) {
         uart.receivedByte = 2;
     }
 
-    /* USER CODE BEGIN 2 */
-    TxHeader.StdId = 0x0378;
-    TxHeader.ExtId = 0;
-    TxHeader.RTR = CAN_RTR_DATA; // CAN_RTR_REMOTE
-    TxHeader.IDE = CAN_ID_STD;   // CAN_ID_EXT
-    TxHeader.DLC = 1; //data size
-    TxHeader.TransmitGlobalTime = (FunctionalState)0;
-
-    HAL_CAN_Start(&hcan);
-    HAL_CAN_ActivateNotification(&hcan,
-                                 CAN_IT_RX_FIFO0_MSG_PENDING | CAN_IT_ERROR | CAN_IT_BUSOFF | CAN_IT_LAST_ERROR_CODE);
-
     for (uint8_t i = 0; i < 8; i++) {
-        TxData[i] = (i + 10);
+        can.TxData[i] = (i + 10);
     }
 
     uint8_t temp=0;
     while (1) {
-        TxHeader.StdId = 0x0378;
-        TxData[0] ++;
-        while (HAL_CAN_GetTxMailboxesFreeLevel(&hcan) == 0){};
-        if (HAL_CAN_AddTxMessage(&hcan, &TxHeader, TxData, &TxMailbox) != HAL_OK) {
+        HAL_Delay(50);
+        can.TxHeader.StdId = 0x0378;
+        can.TxData[0] ++;
+        // wait for free tx FIFO
+        while (HAL_CAN_GetTxMailboxesFreeLevel(&can.hcan) == 0){};
+        if (can.send(can.MAIN, 8) != HAL_OK) {
+            uart.sendStr("CAN_error");
+        }
+        HAL_Delay(50);
+        while (HAL_CAN_GetTxMailboxesFreeLevel(&can.hcan) == 0){};
+        if (can.send(can.UP, 8) != HAL_OK) {
             uart.sendStr("CAN_error");
         }
         HAL_Delay(50);
@@ -96,54 +69,6 @@ void SystemClock_Config(void) {
     if (HAL_RCC_ClockConfig(&RCC_ClkInitStruct, FLASH_LATENCY_1) != HAL_OK) {
         Error_Handler();
     }
-}
-
-static void MX_CAN_Init(void) {
-
-    hcan.Instance = CAN;
-    hcan.Init.Prescaler = 42;
-    //CAN_MODE_NORMAL  CAN_MODE_LOOPBACK   CAN_MODE_SILENT   CAN_MODE_SILENT_LOOPBACK
-    hcan.Init.Mode = CAN_MODE_LOOPBACK;
-    hcan.Init.SyncJumpWidth = CAN_SJW_1TQ; // becomes significant on high speeds
-    hcan.Init.TimeSeg1 = CAN_BS1_6TQ;
-    hcan.Init.TimeSeg2 = CAN_BS2_1TQ;
-    hcan.Init.TimeTriggeredMode = DISABLE; //nodes synchronize mechanism (additional, not allowed by all devices)
-    hcan.Init.AutoBusOff = ENABLE; //automatic resets bus after error overflow
-    hcan.Init.AutoWakeUp = DISABLE; //
-    hcan.Init.AutoRetransmission = ENABLE; // if no ack send another time
-    hcan.Init.ReceiveFifoLocked = DISABLE; // circle buffer in receive FIFO (if ENABLED - usual buffer)
-    hcan.Init.TransmitFifoPriority = ENABLE; // usual fifo mechanism (if disabled priority mechanism tranmittion enabled)
-    if (HAL_CAN_Init(&hcan) != HAL_OK) {
-        Error_Handler();
-    }
-
-    CAN_FilterTypeDef sFilterConfig;
-    sFilterConfig.FilterBank = 0;
-    sFilterConfig.FilterMode = CAN_FILTERMODE_IDMASK;
-    sFilterConfig.FilterScale = CAN_FILTERSCALE_32BIT;
-    sFilterConfig.FilterIdHigh = 0x0000;
-    sFilterConfig.FilterIdLow = 0x0000;
-    sFilterConfig.FilterMaskIdHigh = 0x0000;
-    sFilterConfig.FilterMaskIdLow = 0x0000;
-    sFilterConfig.FilterFIFOAssignment = CAN_RX_FIFO0;
-    sFilterConfig.FilterActivation = ENABLE;
-    // sFilterConfig.SlaveStartFilterBank = 14;
-
-    if (HAL_CAN_ConfigFilter(&hcan, &sFilterConfig) != HAL_OK) {
-        Error_Handler();
-    }
-}
-
-/**
- * @brief GPIO Initialization Function
- * @param None
- * @retval None
- */
-static void MX_GPIO_Init(void) {
-    /* GPIO Ports Clock Enable */
-    __HAL_RCC_GPIOB_CLK_ENABLE();
-    __HAL_RCC_GPIOF_CLK_ENABLE();
-    __HAL_RCC_GPIOA_CLK_ENABLE();
 }
 
 void Error_Handler(void) {

@@ -40,12 +40,12 @@ $(BLD)main.bin: $(BLD)main.elf
 $(BLD)main.lst: $(BLD)main.elf
 	arm-none-eabi-objdump -D $(BLD)main.elf > $(BLD)main.lst
 #___________________ LINKER _________________________________
-$(BLD)main.elf: $(BLD)main.o $(BLD)startup.o $(BLD)uart.o
+$(BLD)main.elf: $(BLD)main.o $(BLD)startup.o $(BLD)uart.o $(BLD)can.o
 $(BLD)main.elf: $(BLD)system_stm32f0xx.o $(BLD)stm32f0xx_it.o $(BLD)stm32f0xx_hal_msp.o 
 $(BLD)main.elf: $(BLD)stm32f0xx_hal.o $(BLD)stm32f0xx_hal_can.o $(BLD)stm32f0xx_hal_cortex.o 
 $(BLD)main.elf: $(BLD)stm32f0xx_hal_gpio.o $(BLD)stm32f0xx_hal_rcc.o 
 	$(CC) -o $(BLD)main.elf -T$(LIB)stm32f042.ld $(BLD)startup.o \
-	$(BLD)main.o $(BLD)uart.o \
+	$(BLD)main.o $(BLD)uart.o $(BLD)can.o \
 	$(BLD)system_stm32f0xx.o $(BLD)stm32f0xx_it.o $(BLD)stm32f0xx_hal_msp.o \
 	$(BLD)stm32f0xx_hal.o $(BLD)stm32f0xx_hal_can.o $(BLD)stm32f0xx_hal_cortex.o \
 	$(BLD)stm32f0xx_hal_gpio.o $(BLD)stm32f0xx_hal_rcc.o \
@@ -92,5 +92,8 @@ $(BLD)main.o: $(SRC)main.cpp
 #arm-none-eabi-objdump main.o -h 				
 $(BLD)uart.o: $(SRC)uart.cpp 
 	$(CC)  $(SRC)uart.cpp -o $(BLD)uart.o -I$(INC) -I$(LIB) -I$(halINC) $(CPPFLAGS)
+$(BLD)can.o: $(SRC)can.cpp 
+	$(CC)  $(SRC)can.cpp -o $(BLD)can.o -I$(INC) -I$(LIB) -I$(halINC) $(CPPFLAGS)	
 clean:
 	rm -rf $(BLD)*.o $(BLD)*.elf $(BLD)*.lst $(BLD)*.bin $(BLD)*.hex $(BLD)*.map
+	mkdir build
