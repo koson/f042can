@@ -1,11 +1,7 @@
-
-/* Includes ------------------------------------------------------------------*/
 #include "main.h"
 #include "uart.h"
 #include "can.h"
-
-
-uint8_t* i = (uint8_t*)0x20000404;
+#include "button.h"
 
 void SystemClock_Config(void);
 
@@ -15,31 +11,52 @@ int main(void) {
     __enable_irq();
     Uart uart;
     Can can;
+    Button buttons;
     
-    if (uart.receivedByte == 0) {
-        uart.receivedByte = 2;
-    }
-
-    for (uint8_t i = 0; i < 8; i++) {
-        can.TxData[i] = (i + 10);
-    }
-
-    uint8_t temp=0;
     while (1) {
         HAL_Delay(50);
         can.TxHeader.StdId = 0x0378;
         can.TxData[0] ++;
-        // wait for free tx FIFO
-        while (HAL_CAN_GetTxMailboxesFreeLevel(&can.hcan) == 0){};
-        if (can.send(can.MAIN, 8) != HAL_OK) {
-            uart.sendStr("CAN_error");
-        }
-        HAL_Delay(50);
-        while (HAL_CAN_GetTxMailboxesFreeLevel(&can.hcan) == 0){};
-        if (can.send(can.UP, 8) != HAL_OK) {
-            uart.sendStr("CAN_error");
-        }
-        HAL_Delay(50);
+        switch(buttons.butState) {
+            case ButtonState::NOT_PRESSED: {
+                
+            } break;
+            case ButtonState::UP: {
+                while (HAL_CAN_GetTxMailboxesFreeLevel(&can.hcan) == 0){};
+                if (can.send(can.UP, 8) != HAL_OK) {
+                    uart.sendStr("CAN_error");
+                }
+                buttons.butState = ButtonState::NOT_PRESSED;
+            } break;
+            case ButtonState::DOWN: {
+                while (HAL_CAN_GetTxMailboxesFreeLevel(&can.hcan) == 0){};
+                if (can.send(can.DOWN, 8) != HAL_OK) {
+                    uart.sendStr("CAN_error");
+                }
+                buttons.butState = ButtonState::NOT_PRESSED;
+            } break;
+            case ButtonState::UP_DOWN: {
+                while (HAL_CAN_GetTxMailboxesFreeLevel(&can.hcan) == 0){};
+                if (can.send(can.ENTER, 8) != HAL_OK) {
+                    uart.sendStr("CAN_error");
+                }
+                buttons.butState = ButtonState::NOT_PRESSED;
+            } break;
+            case ButtonState::UP_LONG: {
+                while (HAL_CAN_GetTxMailboxesFreeLevel(&can.hcan) == 0){};
+                if (can.send(can.MAIN, 8) != HAL_OK) {
+                    uart.sendStr("CAN_error");
+                }
+                buttons.butState = ButtonState::NOT_PRESSED;
+            } break;
+            case ButtonState::DOWN_LONG: {
+                while (HAL_CAN_GetTxMailboxesFreeLevel(&can.hcan) == 0){};
+                if (can.send(can.BC, 8) != HAL_OK) {
+                    uart.sendStr("CAN_error");
+                }
+                buttons.butState = ButtonState::NOT_PRESSED;
+            } break;
+        }        
     }
 }
 
@@ -81,5 +98,3 @@ void Error_Handler(void) {
 
 void assert_failed(uint8_t *file, uint32_t line) {}
 #endif /* USE_FULL_ASSERT */
-
-/************************ (C) COPYRIGHT STMicroelectronics *****END OF FILE****/
