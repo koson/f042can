@@ -4,6 +4,10 @@
 //#include "can.h"
 #include "stm32f0xx_hal.h"
 
+extern "C" void EXTI4_15_IRQHandler(void);
+extern "C" void TIM2_IRQHandler(void);
+extern "C" void TIM3_IRQHandler(void);
+
 enum class ButtonState {
     NOT_PRESSED = 0,
     UP,

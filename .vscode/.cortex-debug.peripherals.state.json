@@ -1,1 +1,1 @@
-[{"node":"CAN","expanded":true,"format":0,"pinned":false},{"node":"CAN.CAN_MSR","expanded":true,"format":0}]
+[{"node":"GPIOA","expanded":true,"format":0,"pinned":false},{"node":"GPIOA.IDR","expanded":true,"format":0},{"node":"SYSCFG.EXTICR1","expanded":true,"format":0},{"node":"SYSCFG.EXTICR2","expanded":true,"format":0},{"node":"SYSCFG.EXTICR3","expanded":true,"format":0},{"node":"TIM2","expanded":true,"format":0,"pinned":false},{"node":"TIM2.CNT","expanded":true,"format":0}]

@@ -36,12 +36,12 @@ void Button::init() {
     NVIC_EnableIRQ(TIM3_IRQn);
 }
 
-extern "C" void EXTI4_15IRQHandler(void) {
+void EXTI4_15_IRQHandler(void) {
     NVIC_DisableIRQ(EXTI4_15_IRQn);//! disable interrupt while timer6 updates  
     TIM2->CR1 |= TIM_CR1_CEN; //start timer
 }
 
-extern "C" void TIM2_IRQ_Handler(void) {
+void TIM2_IRQHandler(void) {
     TIM2->SR &= ~TIM_SR_UIF; //clear interrupt flag
     TIM2->CR1 &= ~TIM_CR1_CEN; //stop timer
     //pressed both buttons
@@ -70,7 +70,7 @@ extern "C" void TIM2_IRQ_Handler(void) {
     TIM2->CNT = 0;
 }
 
-extern "C" void TIM3_IRQ_Handler(void) {
+void TIM3_IRQHandler(void) {
     TIM3->SR &=~ TIM_SR_UIF; //clear interrupt flag
     TIM3->CR1 &=~ TIM_CR1_CEN; // disable timer
     TIM3->CNT = 0;
