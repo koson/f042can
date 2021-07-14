@@ -26,6 +26,7 @@ int main(void) {
                 if (can.send(can.UP, 8) != HAL_OK) {
                     uart.sendStr("CAN_error");
                 }
+                uart.sendStr("UP");
                 buttons.butState = ButtonState::NOT_PRESSED;
             } break;
             case ButtonState::DOWN: {
@@ -33,6 +34,7 @@ int main(void) {
                 if (can.send(can.DOWN, 8) != HAL_OK) {
                     uart.sendStr("CAN_error");
                 }
+                uart.sendStr("DOWN");
                 buttons.butState = ButtonState::NOT_PRESSED;
             } break;
             case ButtonState::UP_DOWN: {
@@ -40,6 +42,7 @@ int main(void) {
                 if (can.send(can.ENTER, 8) != HAL_OK) {
                     uart.sendStr("CAN_error");
                 }
+                uart.sendStr("UP_DOWN");
                 buttons.butState = ButtonState::NOT_PRESSED;
             } break;
             case ButtonState::UP_LONG: {
@@ -47,6 +50,7 @@ int main(void) {
                 if (can.send(can.MAIN, 8) != HAL_OK) {
                     uart.sendStr("CAN_error");
                 }
+                uart.sendStr("MAIN");
                 buttons.butState = ButtonState::NOT_PRESSED;
             } break;
             case ButtonState::DOWN_LONG: {
@@ -54,6 +58,7 @@ int main(void) {
                 if (can.send(can.BC, 8) != HAL_OK) {
                     uart.sendStr("CAN_error");
                 }
+                uart.sendStr("BC");
                 buttons.butState = ButtonState::NOT_PRESSED;
             } break;
         }        

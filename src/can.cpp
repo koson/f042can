@@ -72,7 +72,7 @@ void Can::MX_GPIO_Init(void) {
 void HAL_CAN_RxFifo0MsgPendingCallback(CAN_HandleTypeDef *hcan) {
     if (HAL_CAN_GetRxMessage(&Can::pThis->hcan, CAN_RX_FIFO0, &Can::pThis->RxHeader, Can::pThis->RxData) == HAL_OK) {
         //uart.sendStr("RxFifo");
-        for(int i = 0; i<1; i++) {
+        for(int i = 0; i<8; i++) {
             Uart::pThis->sendByte(Can::pThis->RxData[i]);
         }
     }
@@ -85,6 +85,6 @@ void HAL_CAN_ErrorCallback(CAN_HandleTypeDef *hcan) {
 }
 
 
-extern "C" void CEC_CAN_IRQHandler(void) { 
+void CEC_CAN_IRQHandler(void) { 
     HAL_CAN_IRQHandler(&Can::pThis->hcan);
 }

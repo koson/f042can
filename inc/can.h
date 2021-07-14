@@ -7,7 +7,7 @@
 
 extern "C" void CEC_CAN_IRQHandler(void);
 extern "C" void HAL_CAN_RxFifo0MsgPendingCallback(CAN_HandleTypeDef *hcan);
-extern "C" extern "C" void CEC_CAN_IRQHandler(void);
+extern "C" void CEC_CAN_IRQHandler(void);
 
 class Can {
 public:
@@ -25,7 +25,7 @@ public:
     const uint8_t ENTER[8] = {0x80, 0x7D, 0x01, 0x00, 0x00, 0x00, 0x00, 0x00};
 
     uint8_t UP[8] =   {0x80, 0x7C, 0xFF, 0x00, 0x00, 0x00, 0x00, 0x00};
-    uint8_t DOWN[8] = {0x7C, 0x7C, 0x01, 0x00, 0x00, 0x00, 0x00, 0x00};
+    uint8_t DOWN[8] = {0x80, 0x7C, 0x01, 0x00, 0x00, 0x00, 0x00, 0x00};
 
     HAL_StatusTypeDef send(const uint8_t* data, uint8_t size);
 
