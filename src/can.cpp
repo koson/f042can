@@ -16,7 +16,7 @@ void Can::init() {
     MX_GPIO_Init();
     MX_CAN_Init();
     /* USER CODE BEGIN 2 */
-    TxHeader.StdId = 0x0378;
+    TxHeader.StdId = 0x0290;
     TxHeader.ExtId = 0;
     TxHeader.RTR = CAN_RTR_DATA; // CAN_RTR_REMOTE
     TxHeader.IDE = CAN_ID_STD;   // CAN_ID_EXT
@@ -72,9 +72,9 @@ void Can::MX_GPIO_Init(void) {
 void HAL_CAN_RxFifo0MsgPendingCallback(CAN_HandleTypeDef *hcan) {
     if (HAL_CAN_GetRxMessage(&Can::pThis->hcan, CAN_RX_FIFO0, &Can::pThis->RxHeader, Can::pThis->RxData) == HAL_OK) {
         //uart.sendStr("RxFifo");
-        for(int i = 0; i<8; i++) {
-            Uart::pThis->sendByte(Can::pThis->RxData[i]);
-        }
+        //for(int i = 0; i<8; i++) {
+        //    Uart::pThis->sendByte(Can::pThis->RxData[i]);
+        //}
     }
 }
 

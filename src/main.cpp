@@ -14,14 +14,19 @@ int main(void) {
     Button buttons;
     
     while (1) {
-        HAL_Delay(50);
-        can.TxHeader.StdId = 0x0378;
-        can.TxData[0] ++;
+        HAL_Delay(150);        
+        can.TxHeader.StdId = 0x06A1;
+        while (HAL_CAN_GetTxMailboxesFreeLevel(&can.hcan) == 0) {
+        };
+        if (can.send(can.TEMP, 8) != HAL_OK) {
+            uart.sendStr("CAN_error");
+        }
         switch(buttons.butState) {
             case ButtonState::NOT_PRESSED: {
                 
             } break;
             case ButtonState::UP: {
+                can.TxHeader.StdId = 0x0290;
                 while (HAL_CAN_GetTxMailboxesFreeLevel(&can.hcan) == 0){};
                 if (can.send(can.UP, 8) != HAL_OK) {
                     uart.sendStr("CAN_error");
@@ -30,6 +35,7 @@ int main(void) {
                 buttons.butState = ButtonState::NOT_PRESSED;
             } break;
             case ButtonState::DOWN: {
+                can.TxHeader.StdId = 0x0290;
                 while (HAL_CAN_GetTxMailboxesFreeLevel(&can.hcan) == 0){};
                 if (can.send(can.DOWN, 8) != HAL_OK) {
                     uart.sendStr("CAN_error");
@@ -38,6 +44,7 @@ int main(void) {
                 buttons.butState = ButtonState::NOT_PRESSED;
             } break;
             case ButtonState::UP_DOWN: {
+                can.TxHeader.StdId = 0x0290;
                 while (HAL_CAN_GetTxMailboxesFreeLevel(&can.hcan) == 0){};
                 if (can.send(can.ENTER, 8) != HAL_OK) {
                     uart.sendStr("CAN_error");
@@ -46,6 +53,7 @@ int main(void) {
                 buttons.butState = ButtonState::NOT_PRESSED;
             } break;
             case ButtonState::UP_LONG: {
+                can.TxHeader.StdId = 0x0290;
                 while (HAL_CAN_GetTxMailboxesFreeLevel(&can.hcan) == 0){};
                 if (can.send(can.MAIN, 8) != HAL_OK) {
                     uart.sendStr("CAN_error");
@@ -54,6 +62,7 @@ int main(void) {
                 buttons.butState = ButtonState::NOT_PRESSED;
             } break;
             case ButtonState::DOWN_LONG: {
+                can.TxHeader.StdId = 0x0290;
                 while (HAL_CAN_GetTxMailboxesFreeLevel(&can.hcan) == 0){};
                 if (can.send(can.BC, 8) != HAL_OK) {
                     uart.sendStr("CAN_error");
